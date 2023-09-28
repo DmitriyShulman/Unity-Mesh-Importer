@@ -98,8 +98,8 @@ namespace MeshExtensions.Editor
                 }
             }
 
-            AssetDatabase.Refresh();
-            AssetDatabase.SaveAssets();
+            //AssetDatabase.Refresh();
+            //AssetDatabase.SaveAssets();
         }
 
         #endregion
