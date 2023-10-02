@@ -66,6 +66,14 @@ namespace MeshExtensions.Editor
             }
             else
             {
+                if (ProjectSettings.AutoGenerateUV2)
+                {
+                    foreach (MeshFilter meshFilter in meshFilters)
+                    {
+                        Unwrapping.GenerateSecondaryUVSet(meshFilter.sharedMesh);
+                    }
+                }
+
                 if (ProjectSettings.AutoCollapsePostProcessor)
                 {
                     List<MeshModifier> functions = new List<MeshModifier>();
@@ -83,6 +91,37 @@ namespace MeshExtensions.Editor
                     _userData.meshModifiers = functions.ToArray();
                     assetImporter.userData = JsonUtility.ToJson(_userData);
                     
+                    EditorUtility.SetDirty(assetImporter);
+                }
+
+                if(ProjectSettings.AutoCombinePostProcessor)
+                {
+                    List<MeshModifier> functions = new List<MeshModifier>();
+                    foreach (MeshFilter meshFilter in meshFilters)
+                    {
+                        MeshModifier m = new MeshModifier(meshFilter.sharedMesh.name);
+                        m.modifier = Modifier.Combine;
+
+                        m.uVs[0] = meshFilter.sharedMesh.uv.Any() ? UVChannel.UV0 : UVChannel.None;
+                        m.uVs[1] = meshFilter.sharedMesh.uv2.Any() ? UVChannel.UV1 : UVChannel.None;
+
+                        functions.Add(m);
+
+                        if (m.uVs[0] != UVChannel.None && m.uVs[1] != UVChannel.None)
+                        {
+                            Combine(meshFilter, m);
+                            Debug.Log($"UVs for mesh '{meshFilter.sharedMesh.name}' auto combineded. Asset '{assetPath}.'");
+                        }
+                        else
+                        {
+                            if (m.uVs[0] == UVChannel.None) Debug.Log("UV0 is not exist");
+                            if (m.uVs[1] == UVChannel.None) Debug.Log("UV2 is not exist");
+                        }
+                    }
+
+                    _userData.meshModifiers = functions.ToArray();
+                    assetImporter.userData = JsonUtility.ToJson(_userData);
+
                     EditorUtility.SetDirty(assetImporter);
                 }
             }

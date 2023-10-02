@@ -569,8 +569,10 @@ namespace MeshExtensions.Editor
 		        guiHandler = searchContext =>
 		        {
 			        bool autoCollapse = ProjectSettings.AutoCollapsePostProcessor;
-			        
-			        EditorGUILayout.LabelField("Model mesh import defaults", EditorStyles.boldLabel);
+					bool autoCombine = ProjectSettings.AutoCombinePostProcessor;
+					bool autoGenerateUV2 = ProjectSettings.AutoGenerateUV2;
+
+					EditorGUILayout.LabelField("Model mesh import defaults", EditorStyles.boldLabel);
 			        EditorGUILayout.HelpBox(Styles.ProjectInfo.text, MessageType.None);
 			        
 			        EditorGUI.BeginChangeCheck();
@@ -578,10 +580,31 @@ namespace MeshExtensions.Editor
 			        if (EditorGUI.EndChangeCheck())
 			        {
 				        ProjectSettings.AutoCollapsePostProcessor = autoCollapse;
-			        }
-			        
-			        EditorGUILayout.Space();
-			        EditorGUILayout.HelpBox(Styles.ProjectTip.text, MessageType.Info);
+						if (autoCollapse) ProjectSettings.AutoCombinePostProcessor = false;
+					}
+
+					EditorGUILayout.Space();
+
+					EditorGUI.BeginChangeCheck();
+					autoCombine = EditorGUILayout.Toggle(Styles.ProjectCombine, autoCombine);
+					if (EditorGUI.EndChangeCheck())
+					{
+						ProjectSettings.AutoCombinePostProcessor = autoCombine;
+						if (autoCombine) ProjectSettings.AutoCollapsePostProcessor = false;
+					}
+
+					EditorGUILayout.Space();
+
+					EditorGUI.BeginChangeCheck();
+					autoGenerateUV2 = EditorGUILayout.Toggle(Styles.AutoGenerateUV2, autoGenerateUV2);
+					if (EditorGUI.EndChangeCheck())
+					{
+						ProjectSettings.AutoGenerateUV2 = autoGenerateUV2;
+					}
+
+					EditorGUILayout.Space();
+					EditorGUILayout.HelpBox(Styles.TogglesTip.text, MessageType.Info);
+					EditorGUILayout.HelpBox(Styles.ProjectTip.text, MessageType.Info);
 		        },
 		        keywords = new HashSet<string>(new [] { "auto collapse post processor", "mesh import", "model import" })
 	        };
@@ -874,8 +897,11 @@ namespace MeshExtensions.Editor
 	        public static GUIContent Info = EditorGUIUtility.TrTextContent("Modifiers can be added to the import of this mesh. To do this, click on the 'Add' button at the top right.");
 	        public static GUIContent ProjectInfo = EditorGUIUtility.TrTextContent("These defaults are used when importing a new model asset in the model post-processor. Note that it is always possibe to change the initial values manually on mesh asset basis by selecting the asset in the inspector window.");
 	        public static GUIContent ProjectTip = EditorGUIUtility.TrTextContent("Tip: To apply the import settings to your models, re-import them into the project.");
-	        public static GUIContent ProjectCollapse = EditorGUIUtility.TrTextContent("Auto Collapse UVs", "For all meshes that are not manually configured, all UVs will automatically collapse.");
-	        public static GUIContent Add = EditorGUIUtility.TrTextContent("Add", "Add a new mesh modifier.");
+			public static GUIContent TogglesTip = EditorGUIUtility.TrTextContent("Tip: Auto colapse and Auto combine toggles are interchangeable.");
+			public static GUIContent ProjectCollapse = EditorGUIUtility.TrTextContent("Auto Collapse UVs", "For all meshes that are not manually configured, all UVs will automatically collapse.");
+			public static GUIContent ProjectCombine = EditorGUIUtility.TrTextContent("Auto Combine UVs", "For all meshes that are not manually configured, UV0 and UV1 will automatically combine.");
+			public static GUIContent AutoGenerateUV2 = EditorGUIUtility.TrTextContent("Auto Generate UV2", "Automatically generate UV2 for Lightmaps");
+			public static GUIContent Add = EditorGUIUtility.TrTextContent("Add", "Add a new mesh modifier.");
 	        public static GUIContent Delete = EditorGUIUtility.TrTextContent("Delete", "Remove the mesh modifier.");
 	        public static GUIContent Reset = EditorGUIUtility.TrTextContent("Reset", "Delete all modifiers fr0m the mesh.");
 	        public static GUIContent Apply = EditorGUIUtility.TrTextContent("Apply", "Apply modifiers to the mesh.");
